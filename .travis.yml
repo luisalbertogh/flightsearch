@@ -1,4 +1,4 @@
 language: java
-install: "mvn integration-test"
+install: "mvn integration-test -P integration-test"
 jdk:
   - oraclejdk8
