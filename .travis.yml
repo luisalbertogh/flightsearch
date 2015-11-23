@@ -1,4 +1,4 @@
 language: java
-script: "mvn integration-test -P integration-test"
+script: "mvn integration-test -P integration"
 jdk:
   - oraclejdk8
