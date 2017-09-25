@@ -8,6 +8,15 @@
   <properties>
       <unit-tests.skip>false</unit-tests.skip>
       <integration-tests.skip>true</integration-tests.skip>
+      <!-- Set sonar url here if not defined yet <sonar.host.url>http://.....</sonar.host.url> -->
+      <!-- Jacoco configuration -->
+      <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
+      <!-- Jacoco output file for UTs -->
+      <jacoco.out.ut.file>jacoco-ut.exec</jacoco.out.ut.file>
+      <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.ut.file}</sonar.jacoco.reportPath>
+      <!-- Jacoco output file for ITs -->
+      <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
+      <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
   </properties>
   
   <!-- POM Spring Boot parent -->
@@ -49,8 +58,44 @@
   </dependencies>
   
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <plugins>
+      <!-- JaCoCo code coverage -->
+      <plugin>
+	      <groupId>org.jacoco</groupId>
+	      <artifactId>jacoco-maven-plugin</artifactId>
+	      <version>0.7.8</version>
+	      <executions>
+	            <!-- Prepares a variable, jacoco.agent.ut.arg, that contains the info
+	                to be passed to the JVM hosting the code being tested. -->
+	            <execution>
+	                <id>prepare-ut-agent</id>
+	                <phase>process-test-classes</phase>
+	                <goals>
+	                    <goal>prepare-agent</goal>
+	                </goals>
+	                <configuration>
+	                    <destFile>${sonar.jacoco.reportPath}</destFile>
+	                    <propertyName>jacoco.agent.ut.arg</propertyName>
+	                    <append>true</append>
+	                </configuration>
+	            </execution>
+	            <!-- Prepares a variable, jacoco.agent.it.arg, that contains the info
+	                to be passed to the JVM hosting the code being tested. -->
+	            <execution>
+	                <id>prepare-it-agent</id>
+	                <phase>pre-integration-test</phase>
+	                <goals>
+	                    <goal>prepare-agent</goal>
+	                </goals>
+	                <configuration>
+	                    <destFile>${sonar.jacoco.itReportPath}</destFile>
+	                    <propertyName>jacoco.agent.it.arg</propertyName>
+	                    <append>true</append>
+	                </configuration>
+	            </execution>
+	        </executions>
+      </plugin>
+      <!-- Maven compiler -->
 	  <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -83,6 +128,8 @@
 	        <excludes>
 	          <exclude>**/*ITest.java</exclude>
 	        </excludes>
+	        <!-- Add Jacoco report path for UT plugin -->
+	        <argLine>${jacoco.agent.ut.arg}</argLine>
 	      </configuration>
 	  </plugin>
       <plugin>
@@ -98,6 +145,13 @@
 	            <includes>
 	              <include>**/*ITest.class</include>
 	            </includes>
+	            <!-- Add Jacoco report path for IT plugin -->
+	            <argLine>${jacoco.agent.it.arg}</argLine>
+                <!-- Let's put failsafe reports with surefire to have access to tests
+                    failures/success reports in sonar -->
+                <reportsDirectory>
+                	${project.build.directory}/surefire-reports
+                </reportsDirectory>
 	          </configuration>
 	        </execution>
 	      </executions>
