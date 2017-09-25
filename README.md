@@ -1,13 +1,13 @@
 # flightsearch
 Flight search testing application
 
-** Unit test
+## Unit test
 mvn clean test
 
-** Integration test
+## Integration test
 mvn clean integration-test -Pintegration
 
-** Sonar integration
+## Sonar integration
 mvn clean test
 mvn sonar:sonar
 
